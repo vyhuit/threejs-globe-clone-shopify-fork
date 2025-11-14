@@ -1,3 +1,4 @@
+import { MathUtils, Vector3 } from "three";
 import { createCamera } from "./components/camera";
 import { createRenderer } from "./systems/renderer";
 import { createScene } from "./components/scene";
@@ -7,6 +8,7 @@ import { createLights } from "./components/lights";
 import { Resizer } from "./systems/resizer";
 import { Globe } from "./components/globe";
 import { pointOfView } from "./systems/utils";
+import { minZoomDistance, maxZoomDistance, zoomStep } from "./systems/config";
 
 let camera;
 let controls;
@@ -14,9 +16,11 @@ let renderer;
 let scene;
 let loop;
 let globe;
+const zoomVector = new Vector3();
 
 class World {
   constructor(container) {
+    this.container = container;
     renderer = createRenderer();
     scene = createScene();
     camera = createCamera();
@@ -46,6 +50,7 @@ class World {
     const resizer = new Resizer(camera, renderer);
 
     container.append(renderer.domElement);
+    this.initZoomButtons();
   }
 
   render() {
@@ -58,6 +63,45 @@ class World {
 
   stop() {
     loop.stop();
+  }
+
+  initZoomButtons() {
+    if (!this.container) {
+      return;
+    }
+
+    const zoomButtons = this.container.querySelectorAll("[data-zoom-direction]");
+
+    zoomButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const direction = button.getAttribute("data-zoom-direction");
+        const delta = direction === "in" ? -zoomStep : zoomStep;
+        this.updateZoom(delta);
+      });
+    });
+  }
+
+  updateZoom(delta) {
+    if (!camera || !controls) {
+      return;
+    }
+
+    const currentDistance = camera.position.distanceTo(controls.target);
+    const nextDistance = MathUtils.clamp(
+      currentDistance + delta,
+      minZoomDistance,
+      maxZoomDistance
+    );
+
+    zoomVector
+      .copy(camera.position)
+      .sub(controls.target)
+      .normalize()
+      .multiplyScalar(nextDistance)
+      .add(controls.target);
+
+    camera.position.copy(zoomVector);
+    controls.update();
   }
 }
 
