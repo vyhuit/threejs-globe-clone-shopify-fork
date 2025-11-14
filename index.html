@@ -5,15 +5,94 @@
   <meta charset="utf-8">
   <title>My first three.js app</title>
   <style>
+    :root {
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont,
+        "Helvetica Neue", sans-serif;
+      color: #f1f5f9;
+      background-color: #020617;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
+      min-height: 100vh;
+    }
+
+    .mainDiv {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), #020617 65%);
+    }
+
+    #globe-container {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      padding: 16px;
+    }
+
+    #globe-container canvas {
+      display: block;
+      border-radius: 24px;
+      box-shadow: 0 35px 65px rgba(2, 6, 23, 0.8);
+    }
+
+    .zoom-controls {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .zoom-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid rgba(248, 250, 252, 0.2);
+      background: rgba(15, 23, 42, 0.9);
+      color: inherit;
+      font-size: 1.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+      box-shadow: 0 8px 20px rgba(2, 6, 23, 0.6);
+    }
+
+    .zoom-btn:hover,
+    .zoom-btn:focus-visible {
+      background: rgba(59, 130, 246, 0.85);
+      outline: none;
+      transform: translateY(-1px);
+    }
+
+    .zoom-btn:active {
+      transform: translateY(1px);
     }
   </style>
 </head>
 
 <body>
   <div class="mainDiv">
-    <div id="globe-container"></div>
+    <div id="globe-container">
+      <div class="zoom-controls" data-zoom-controls>
+        <button type="button" class="zoom-btn" data-zoom-direction="in" aria-label="Zoom in">
+          +
+        </button>
+        <button type="button" class="zoom-btn" data-zoom-direction="out" aria-label="Zoom out">
+          &minus;
+        </button>
+      </div>
+    </div>
     <!-- <div>
               <div class="title">Let's build from here, together.</div>
               <div class="description">The complete developer platform to build, scale, and deliver secure software.</div>
