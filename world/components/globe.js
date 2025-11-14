@@ -4,24 +4,34 @@ import arcsData from "../assets/arcs-data.json";
 import { hexToRgb, genRandomNumbers } from "../systems/utils";
 import { Color } from "three";
 
-const ARC_REL_LEN = 0.9; // relative to whole arc
-const FLIGHT_TIME = 2000;
-const NUM_RINGS = 1;
-const RINGS_MAX_R = 3; // deg
-const RING_PROPAGATION_SPEED = 3; // deg/sec
-
-const interval = 2;
-let deltaGlobe = 0;
-let numbersOfRings = 0;
+const defaultGlobeConfig = {
+  arcRelativeLength: 0.9, // relative to whole arc
+  flightTime: 2000,
+  numRings: 1,
+  ringMaxRadius: 3, // deg
+  ringPropagationSpeed: 3, // deg/sec
+  ringSpawnInterval: 2,
+  hexPolygonResolution: 3,
+  hexPolygonMargin: 0.7,
+  showAtmosphere: true,
+  atmosphereColor: "#ffffff",
+  atmosphereAltitude: 0.1,
+  polygonColor: "rgba(255,255,255, 0.7)",
+  pointAltitude: 0.0,
+  pointRadius: 0.25,
+};
 
 class Globe {
-  constructor() {
+  constructor(config = {}) {
+    this.config = { ...defaultGlobeConfig, ...config };
     this.instance = new ThreeGlobe({
       waitForGlobeReady: true,
       animateIn: true,
     });
     this.pointsData = [];
     this.currentColor = "#3b42ec";
+    this.deltaGlobe = 0;
+    this.numbersOfRings = 0;
 
     this._buildData();
     this._buildMaterial();
@@ -36,65 +46,31 @@ class Globe {
 
   initCountries(delay) {
     setTimeout(() => {
-      this.instance
-        .hexPolygonsData(countries.features)
-        .hexPolygonResolution(3)
-        .hexPolygonMargin(0.7)
-        .showAtmosphere(true)
-        .atmosphereColor("#ffffff")
-        .atmosphereAltitude(0.1)
-        .hexPolygonColor((e) => {
-          return "rgba(255,255,255, 0.7)";
-        });
+      this._applyCountryConfig();
     }, delay);
   }
 
   initAnimationData(delay) {
     setTimeout(() => {
-      this.instance
-        .arcsData(arcsData.flights)
-        .arcStartLat((d) => d.startLat * 1)
-        .arcStartLng((d) => d.startLng * 1)
-        .arcEndLat((d) => d.endLat * 1)
-        .arcEndLng((d) => d.endLng * 1)
-        .arcColor((e) => e.color)
-        .arcAltitude((e) => {
-          return e.arcAlt * 1;
-        })
-        .arcStroke((e) => {
-          return [0.32, 0.28, 0.3][Math.round(Math.random() * 2)];
-        })
-        .arcDashLength(ARC_REL_LEN)
-        .arcDashInitialGap((e) => e.order * 1)
-        .arcDashGap(15)
-        .arcDashAnimateTime((e) => FLIGHT_TIME)
-        .pointsData(this.pointsData)
-        .pointColor((e) => e.color)
-        .pointsMerge(true)
-        .pointAltitude(0.0)
-        .pointRadius(0.25)
-        .ringsData([])
-        .ringColor((e) => (t) => e.color(t))
-        .ringMaxRadius(RINGS_MAX_R)
-        .ringPropagationSpeed(RING_PROPAGATION_SPEED)
-        .ringRepeatPeriod((FLIGHT_TIME * ARC_REL_LEN) / NUM_RINGS);
+      this._applyAnimationConfig();
     }, delay);
   }
 
   tick(delta) {
-    deltaGlobe += delta;
+    this.deltaGlobe += delta;
 
-    if (deltaGlobe > interval) {
-      numbersOfRings = genRandomNumbers(
+    if (this.deltaGlobe > this.config.ringSpawnInterval) {
+      this.numbersOfRings = genRandomNumbers(
         0,
         this.pointsData.length,
         Math.floor((this.pointsData.length * 4) / 5)
       );
       this.instance.ringsData(
-        this.pointsData.filter((d, i) => numbersOfRings.includes(i))
+        this.pointsData.filter((d, i) => this.numbersOfRings.includes(i))
       );
 
-      deltaGlobe = deltaGlobe % interval;
+      this.deltaGlobe =
+        this.deltaGlobe % this.config.ringSpawnInterval;
     }
   }
 
@@ -133,6 +109,82 @@ class Globe {
     globeMaterial.emissive = new Color(0x220038);
     globeMaterial.emissiveIntensity = 0.1;
     globeMaterial.shininess = 0.9;
+  }
+
+  _applyCountryConfig() {
+    const {
+      hexPolygonResolution,
+      hexPolygonMargin,
+      showAtmosphere,
+      atmosphereColor,
+      atmosphereAltitude,
+      polygonColor,
+    } = this.config;
+
+    const polygonColorFn =
+      typeof polygonColor === "function"
+        ? polygonColor
+        : () => polygonColor;
+
+    this.instance
+      .hexPolygonsData(countries.features)
+      .hexPolygonResolution(hexPolygonResolution)
+      .hexPolygonMargin(hexPolygonMargin)
+      .showAtmosphere(showAtmosphere)
+      .atmosphereColor(atmosphereColor)
+      .atmosphereAltitude(atmosphereAltitude)
+      .hexPolygonColor(polygonColorFn);
+  }
+
+  _applyAnimationConfig() {
+    const {
+      arcRelativeLength,
+      flightTime,
+      ringMaxRadius,
+      ringPropagationSpeed,
+      pointAltitude,
+      pointRadius,
+      numRings,
+    } = this.config;
+
+    const ringRepeatPeriod =
+      numRings === 0
+        ? Infinity
+        : (flightTime * arcRelativeLength) / numRings;
+
+    this.instance
+      .arcsData(arcsData.flights)
+      .arcStartLat((d) => d.startLat * 1)
+      .arcStartLng((d) => d.startLng * 1)
+      .arcEndLat((d) => d.endLat * 1)
+      .arcEndLng((d) => d.endLng * 1)
+      .arcColor((e) => e.color)
+      .arcAltitude((e) => {
+        return e.arcAlt * 1;
+      })
+      .arcStroke((e) => {
+        return [0.32, 0.28, 0.3][Math.round(Math.random() * 2)];
+      })
+      .arcDashLength(arcRelativeLength)
+      .arcDashInitialGap((e) => e.order * 1)
+      .arcDashGap(15)
+      .arcDashAnimateTime((e) => flightTime)
+      .pointsData(this.pointsData)
+      .pointColor((e) => e.color)
+      .pointsMerge(true)
+      .pointAltitude(pointAltitude)
+      .pointRadius(pointRadius)
+      .ringsData([])
+      .ringColor((e) => (t) => e.color(t))
+      .ringMaxRadius(ringMaxRadius)
+      .ringPropagationSpeed(ringPropagationSpeed)
+      .ringRepeatPeriod(ringRepeatPeriod);
+  }
+
+  updateConfig(partialConfig = {}) {
+    this.config = { ...this.config, ...partialConfig };
+    this._applyCountryConfig();
+    this._applyAnimationConfig();
   }
 
   setColor(hexColor) {
