@@ -126,6 +126,15 @@ class World {
       transitionDuration
     );
   }
+
+  updateGlobeConfig(config) {
+    if (!globe || !config) {
+      return;
+    }
+
+    globe.updateConfig(config);
+    this.render();
+  }
 }
 
 export { World };
