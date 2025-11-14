@@ -28,6 +28,8 @@
       justify-content: center;
       align-items: center;
       background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), #020617 65%);
+      position: relative;
+      overflow: hidden;
     }
 
     #globe-container {
@@ -78,11 +80,250 @@
     .zoom-btn:active {
       transform: translateY(1px);
     }
+
+    .settings-btn {
+      position: absolute;
+      top: 32px;
+      left: 32px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(248, 250, 252, 0.2);
+      background: rgba(15, 23, 42, 0.85);
+      color: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(2, 6, 23, 0.65);
+      transition: background 0.2s ease, transform 0.2s ease,
+        border-color 0.2s ease;
+      z-index: 2;
+    }
+
+    .settings-btn:hover,
+    .settings-btn:focus-visible {
+      background: rgba(59, 130, 246, 0.75);
+      border-color: rgba(248, 250, 252, 0.6);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .hud-panel {
+      position: absolute;
+      bottom: 32px;
+      left: 32px;
+      min-width: 280px;
+      padding: 20px 24px;
+      border-radius: 16px;
+      background: rgba(2, 6, 23, 0.75);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      box-shadow: 0 25px 50px rgba(2, 6, 23, 0.65);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 2;
+    }
+
+    .hud-panel__title {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(248, 250, 252, 0.75);
+    }
+
+    .hud-panel__value {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .hud-panel__swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .hud-panel__row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .settings-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: stretch;
+      justify-content: center;
+      padding: 24px;
+      background: radial-gradient(
+        circle at 20% 20%,
+        rgba(59, 130, 246, 0.08),
+        rgba(2, 6, 23, 0.95)
+      );
+      backdrop-filter: blur(14px);
+      z-index: 10;
+    }
+
+    .settings-modal.is-open {
+      display: flex;
+      animation: warpIn 0.45s ease forwards;
+    }
+
+    .settings-modal::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+      background-size: 4px 4px;
+      opacity: 0.25;
+      animation: starfield 10s linear infinite;
+      pointer-events: none;
+    }
+
+    .settings-panel {
+      position: relative;
+      margin: auto;
+      width: min(560px, 100%);
+      border-radius: 28px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.85);
+      padding: 32px;
+      box-shadow: 0 35px 75px rgba(2, 6, 23, 0.85);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      z-index: 1;
+    }
+
+    .settings-panel h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .settings-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+
+    .settings-field label {
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      color: rgba(248, 250, 252, 0.8);
+    }
+
+    .settings-field input,
+    .settings-field textarea {
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(2, 6, 23, 0.65);
+      color: inherit;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      resize: none;
+    }
+
+    .settings-field input[type="color"] {
+      padding: 0;
+      height: 42px;
+    }
+
+    .settings-actions {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .settings-actions button {
+      flex: 1;
+      min-width: 140px;
+      padding: 14px 18px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .settings-actions button[type="submit"] {
+      background: linear-gradient(135deg, #22d3ee, #2563eb);
+      color: #0f172a;
+      box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4);
+    }
+
+    .settings-actions button[type="button"] {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: #f8fafc;
+    }
+
+    @keyframes warpIn {
+      from {
+        opacity: 0;
+        transform: scale(1.05);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes starfield {
+      from {
+        transform: translateY(0);
+      }
+
+      to {
+        transform: translateY(10%);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .settings-btn {
+        left: 16px;
+        top: 16px;
+      }
+
+      .hud-panel {
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+      }
+
+      .settings-panel {
+        padding: 24px 20px;
+      }
+    }
   </style>
 </head>
 
 <body>
   <div class="mainDiv">
+    <button type="button" class="settings-btn" data-open-settings>
+      <span>Open flight deck</span>
+    </button>
     <div id="globe-container">
       <div class="zoom-controls" data-zoom-controls>
         <button type="button" class="zoom-btn" data-zoom-direction="in" aria-label="Zoom in">
@@ -93,11 +334,58 @@
         </button>
       </div>
     </div>
-    <!-- <div>
-              <div class="title">Let's build from here, together.</div>
-              <div class="description">The complete developer platform to build, scale, and deliver secure software.</div>
-            </div> -->
+    <div class="hud-panel" aria-live="polite">
+      <div class="hud-panel__row">
+        <div>
+          <div class="hud-panel__title">Point of view</div>
+          <div class="hud-panel__value" data-hud-position>
+            Lat 22.32°, Lng 114.17°, Alt 1000 km
+          </div>
+        </div>
+        <div class="hud-panel__swatch" data-hud-swatch></div>
+      </div>
+      <div>
+        <div class="hud-panel__title">Mission brief</div>
+        <div class="hud-panel__value" data-hud-mission>Orbital overview</div>
+      </div>
+    </div>
   </div>
+  <section class="settings-modal" data-settings-modal aria-hidden="true">
+    <form class="settings-panel" data-settings-form>
+      <h2>Flight deck settings</h2>
+      <p>
+        Điều chỉnh quỹ đạo, màu sắc và thông tin nhiệm vụ để mô phỏng cảm giác điều
+        khiển bảng điều khiển trong tàu vũ trụ.
+      </p>
+      <div class="settings-grid">
+        <div class="settings-field">
+          <label for="setting-color">Spectrum</label>
+          <input type="color" id="setting-color" name="color" value="#3b42ec" />
+        </div>
+        <div class="settings-field">
+          <label for="setting-lat">Latitude (°)</label>
+          <input type="number" id="setting-lat" name="lat" step="0.01" value="22.3193" />
+        </div>
+        <div class="settings-field">
+          <label for="setting-lng">Longitude (°)</label>
+          <input type="number" id="setting-lng" name="lng" step="0.01" value="114.1694" />
+        </div>
+        <div class="settings-field">
+          <label for="setting-alt">Altitude (km)</label>
+          <input type="range" id="setting-alt" name="altitude" min="400" max="1800" step="50"
+            value="1000" />
+        </div>
+        <div class="settings-field" style="grid-column: span 2;">
+          <label for="setting-mission">Mission brief</label>
+          <textarea id="setting-mission" name="mission" rows="2">Orbital overview</textarea>
+        </div>
+      </div>
+      <div class="settings-actions">
+        <button type="button" data-close-settings>Cancel</button>
+        <button type="submit">Engage</button>
+      </div>
+    </form>
+  </section>
   <script type="module" src="/index.js"></script>
 </body>
 

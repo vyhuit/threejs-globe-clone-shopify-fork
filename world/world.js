@@ -103,6 +103,29 @@ class World {
     camera.position.copy(zoomVector);
     controls.update();
   }
+
+  setGlobeColor(colorHex) {
+    if (!globe) {
+      return;
+    }
+
+    globe.setColor(colorHex);
+    this.render();
+  }
+
+  setPointOfView({ lat, lng, altitude, transitionDuration = 1500 }) {
+    if (!camera || !controls || !globe) {
+      return;
+    }
+
+    pointOfView(
+      camera,
+      controls,
+      globe.instance,
+      { lat, lng, altitude },
+      transitionDuration
+    );
+  }
 }
 
 export { World };

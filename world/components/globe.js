@@ -21,6 +21,7 @@ class Globe {
       animateIn: true,
     });
     this.pointsData = [];
+    this.currentColor = "#3b42ec";
 
     this._buildData();
     this._buildMaterial();
@@ -128,10 +129,26 @@ class Globe {
 
   _buildMaterial() {
     const globeMaterial = this.instance.globeMaterial();
-    globeMaterial.color = new Color(0x3b42ec);
+    globeMaterial.color = new Color(this.currentColor);
     globeMaterial.emissive = new Color(0x220038);
     globeMaterial.emissiveIntensity = 0.1;
     globeMaterial.shininess = 0.9;
+  }
+
+  setColor(hexColor) {
+    if (!hexColor) {
+      return;
+    }
+
+    const normalized = typeof hexColor === "string" ? hexColor : `#${hexColor}`;
+    this.currentColor = normalized;
+    const color = new Color(normalized);
+    const globeMaterial = this.instance.globeMaterial();
+    globeMaterial.color = color;
+
+    const emissiveColor = color.clone();
+    emissiveColor.offsetHSL(0, 0.1, -0.3);
+    globeMaterial.emissive = emissiveColor;
   }
 }
 
